@@ -59,9 +59,10 @@ def run_function(thread_elem):
     latest_article = [];
     while True:
         try:
+            timeout = 3600;
             while not newsThread_status[thread_elem.index].is_set():
                 latest_article = get_last_news(thread_elem.update, thread_elem.context, latest_article)
-                time.sleep(10)
+                time.sleep(timeout)
                 print("after sleep of "+thread_elem.update.message.from_user["username"])
             break;
         except:
@@ -100,8 +101,8 @@ def start(update, context):
         context.bot.send_message(chat_id=update.effective_chat.id, text="bot already running",
                                  parse_mode=ParseMode.HTML)
         return
-    text = "Hi {}!\nI'm a bot, please talk to me!\n".format(update.effective_user.mention_html())
-    context.bot.send_message(chat_id=update.effective_chat.id, text=text, parse_mode=ParseMode.HTML)
+    #text = "Hi {}!\nI'm a bot, please talk to me!\n".format(update.effective_user.mention_html())
+    #context.bot.send_message(chat_id=update.effective_chat.id, text=text, parse_mode=ParseMode.HTML)
     help(update, context)
     newsThread_status.append(Event())  # newsThread_status[counter] = Event()
     newsThread[0] = NewsThread(0, "news_thread" + str(counter), counter, update, context)
@@ -196,10 +197,11 @@ def get_last_news(update, context, latest_article):
 
 def printLatestNews(update, context, latest_article):
     print("new article found: " + latest_article["title"])
-    text = "{}\n{}\n{}".format(latest_article["date"], latest_article["title"], latest_article["link"])
+    #text = "{}\n<b>{}</b>\n> {}".format(latest_article["date"], latest_article["title"], latest_article["link"])
+    text = "{}\n<b>{}</b>\n> {}".format("", latest_article["title"], latest_article["link"])
     chat_id = update.message.chat_id
     if latest_article["img_url"] != "":
-        context.bot.send_photo(chat_id=chat_id, photo=latest_article["img_url"], caption=text)
+        context.bot.send_photo(chat_id=chat_id, photo=latest_article["img_url"], caption=text, parse_mode=ParseMode.HTML)
     else:
         context.bot.send_message(chat_id=chat_id, text=text)
 
@@ -209,6 +211,7 @@ def unknown(update, context):
 
 
 def help(update, context):
+    print()
     commands = ["/start", "/stop", "/status", "/help"]
     descriptions = ["start/restart bot", "stop bot", "shows the program status", "shows this text"]
     text = help_constructor(header="This is the help command list:", commands=commands, descriptions=descriptions,
